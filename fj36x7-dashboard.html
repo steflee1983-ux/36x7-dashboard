@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>福建体彩36选7 - 2026年看盘</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:sans-serif; background:#f5f7fa; color:#333; padding:20px; }
+h1 { text-align:center; color:#e74c3c; font-size:20px; }
+.sub { text-align:center; color:#888; font-size:12px; margin-bottom:14px; }
+#stats { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+.card { flex:1; min-width:90px; background:#fff; border-radius:8px; padding:10px 6px; text-align:center; box-shadow:0 1px 6px rgba(0,0,0,0.08); }
+.card .lbl { font-size:11px; color:#999; }
+.card .val { font-size:18px; font-weight:bold; color:#e74c3c; }
+#tabs { display:flex; gap:0; margin-bottom:12px; border-bottom:2px solid #e74c3c; overflow-x:auto; }
+.tab { padding:8px 12px; cursor:pointer; background:#fff; border:none; font-size:12px; color:#666; }
+.tab.active { background:#e74c3c; color:#fff; }
+.panel { display:none; }
+.panel.active { display:block; }
+table { width:100%; border-collapse:collapse; font-size:11px; }
+th { background:#e74c3c; color:#fff; padding:6px 3px; position:sticky; top:0; z-index:1; }
+td { padding:4px 2px; text-align:center; border-bottom:1px solid #eee; }
+.nb { display:inline-block; width:24px; height:24px; line-height:24px; border-radius:50%; text-align:center; font-size:10px; font-weight:bold; color:#fff; margin:0 1px; }
+.c1 { background:#e74c3c; }
+.c2 { background:#3498db; }
+.c3 { background:#27ae60; }
+.c4 { background:#f39c12; }
+.c5 { background:#9b59b6; }
+.c6 { background:#1abc9c; }
+#update-bar { background:#fff; border-radius:8px; padding:10px 14px; margin-bottom:14px; box-shadow:0 1px 6px rgba(0,0,0,0.08); display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; }
+#update-bar button { padding:6px 14px; border:none; border-radius:5px; cursor:pointer; font-size:12px; }
+.btn-red { background:#e74c3c; color:#fff; }
+.btn-green { background:#27ae60; color:#fff; }
+.btn-blue { background:#3498db; color:#fff; }
+#manual-form { display:none; background:#fff; border-radius:8px; padding:14px; margin-bottom:14px; box-shadow:0 1px 6px rgba(0,0,0,0.08); font-size:12px; }
+#manual-form input { width:60px; padding:4px 6px; margin:2px; border:1px solid #ccc; border-radius:4px; text-align:center; }
+#manual-form .row { margin:6px 0; }
+.trend-table { font-size:11px; table-layout:fixed; border-collapse:collapse; }
+.trend-table th { min-width:28px; padding:3px 1px; border:1px solid #ddd; }
+.trend-table td { padding:1px 1px; height:26px; vertical-align:middle; border:1px solid #eee; }
+.trend-table th:first-child,
+.trend-table td:first-child { position:sticky; left:0; z-index:2; min-width:70px; width:70px; background:#f0f0f0; font-size:11px; border-right:2px solid #e74c3c; }
+.trend-table th:first-child { background:#e74c3c; color:#fff; z-index:3; }
+.trend-table .trend-phase { font-weight:bold; }
+.trend-table .nb { width:22px; height:22px; line-height:22px; font-size:9px; }
+@media (max-width:800px) {
+  #tabs { font-size:11px; }
+  .tab { padding:6px 8px; font-size:11px; }
+  .trend-table th:first-child,
+  .trend-table td:first-child { min-width:58px; width:58px; font-size:10px; }
+  .trend-table th { min-width:22px; padding:2px 0; font-size:9px; }
+  .trend-table td { padding:0 1px; }
+  .trend-table .nb { width:18px; height:18px; line-height:18px; font-size:7px; }
+  .card { min-width:70px; padding:6px 4px; }
+  .card .val { font-size:14px; }
+  .card .lbl { font-size:10px; }
+}
+#bet-area { margin-top:16px; background:#fff; border-radius:10px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.10); }
+#bet-area h3 { margin:0 0 10px 0; color:#e74c3c; }
+#bet-balls { display:flex; flex-wrap:wrap; gap:3px; margin-bottom:10px; }
+#bet-balls .nb { cursor:pointer; border:2px solid transparent; transition:border 0.15s; }
+#bet-balls .nb.selected { border:2px solid #333; transform:scale(1.15); }
+</style>
+</head>
+<body>
+
+<h1>福建体彩36选7 看盘分析</h1>
+<p class="sub">2026年全年度 - 共<span id="total-phases">65</span>期（<span id="last-phase">2026065</span>期及以后）</p>
+
+<div id="update-bar">
+  <span>数据更新：</span>
+  <button class="btn-blue" onclick="checkOnlineUpdate()">在线检查更新</button>
+  <button class="btn-green" onclick="showManualForm()">手动输入新一期</button>
+  <button class="btn-red" onclick="resetData()">恢复初始数据</button>
+  <span id="update-status" style="color:#27ae60;font-weight:bold"></span>
+</div>
+
+<div id="manual-form">
+  <strong>手动输入新一期开奖数据</strong>
+  <div class="row">期号：<input id="inp-phase" placeholder="如 2026066" size="8"> 日期：<input id="inp-date" type="date"> （日期可不填，自动使用今天）</div>
+  <div class="row">开奖号码（7个，01-36）：
+    <input id="inp-n1" maxlength="2" placeholder="01">
+    <input id="inp-n2" maxlength="2" placeholder="02">
+    <input id="inp-n3" maxlength="2" placeholder="03">
+    <input id="inp-n4" maxlength="2" placeholder="04">
+    <input id="inp-n5" maxlength="2" placeholder="05">
+    <input id="inp-n6" maxlength="2" placeholder="06">
+    <input id="inp-n7" maxlength="2" placeholder="07">
+  </div>
+  <div class="row">
+    <button class="btn-green" onclick="addManualData()">确认添加</button>
+    <button class="btn-red" onclick="hideManualForm()">取消</button>
+    <span id="manual-msg" style="margin-left:10px"></span>
+  </div>
+</div>
+
+<div id="stats"></div>
+
+<div id="tabs">
+  <button class="tab" onclick="goTab('trend')">走势图</button>
+  <button class="tab active" onclick="goTab('hist')">开奖历史</button>
+  <button class="tab" onclick="goTab('freq')">号码频率</button>
+  <button class="tab" onclick="goTab('hc')">冷热分析</button>
+  <button class="tab" onclick="goTab('miss')">遗漏统计</button>
+  <button class="tab" onclick="goTab('sum')">综合统计</button>
+</div>
+
+<div id="p-trend" class="panel"></div>
+<div id="p-hist" class="panel active"></div>
+<div id="p-freq" class="panel"></div>
+<div id="p-hc" class="panel"></div>
+<div id="p-miss" class="panel"></div>
+<div id="p-sum" class="panel"></div>
+
+<div id="bet-area">
+  <h3>模拟投注</h3>
+  <div style="font-size:12px; color:#888; margin-bottom:8px;">点击号码球选择/取消 7 个号码，然后点击"模拟投注"</div>
+  <div id="bet-balls"></div>
+  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:12px;">
+    <span>已选：<strong id="bet-count" style="color:#e74c3c">0</strong>/7</span>
+    <button class="btn-green" onclick="randomBet()">机选</button>
+    <button class="btn-red" onclick="clearBet()">清空</button>
+    <button class="btn-blue" onclick="doBet()">模拟投注</button>
+    <span id="bet-msg" style="font-weight:bold"></span>
+  </div>
+  <div id="bet-result" style="margin-top:10px; font-size:12px;"></div>
+  <div id="bet-history" style="margin-top:10px; font-size:12px;"></div>
+</div>
+
+<script src="fj36x7-data.js"></script>
+<script src="fj36x7-app.js"></script>
+</body>
+</html>

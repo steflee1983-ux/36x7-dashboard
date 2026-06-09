@@ -1,0 +1,8 @@
+# 忽略工作目录配置
+.workbuddy/
+
+# 忽略临时文件
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
