@@ -503,6 +503,7 @@ function resetData() {
 updateHeader();
 renderStats();
 renderHistory();
+renderTrend();
 renderBetHistory();
 
 // ===== 自动更新最新开奖数据 =====
