@@ -56,13 +56,14 @@ td { padding:4px 2px; text-align:center; border-bottom:1px solid #eee; }
   .card .val { font-size:14px; }
   .card .lbl { font-size:10px; }
 }
-#bet-area { margin-top:16px; background:#fffbe6; border-radius:10px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.10); border-top:3px solid #f39c12; }
-#bet-area h3 { margin:0 0 10px 0; color:#e74c3c; }
-#bet-balls { display:flex; flex-wrap:wrap; gap:3px; margin-bottom:10px; }
-#bet-balls .nb { cursor:pointer; border:2px solid transparent; transition:border 0.15s, transform 0.15s; }
 #bet-balls .nb.selected { border:2px solid #333; transform:scale(1.15); box-shadow:0 0 6px rgba(0,0,0,0.3); }
 #bet-row td { background:#fffbe6; border-color:#ddd; }
 #bet-row td:first-child { background:#fffbe6; color:#e74c3c; font-weight:bold; }
+
+.trend-table tbody tr:last-child td { background:#fffbe6; border-color:#ddd; padding:1px 2px; }
+.trend-table tbody tr:last-child td:first-child { background:#fffbe6; color:#e74c3c; font-weight:bold; white-space:nowrap; }
+.trend-table tbody tr:last-child .nb { cursor:pointer; border:2px solid transparent; transition:border 0.15s, transform 0.15s; }
+.trend-table tbody tr:last-child .nb.selected { border:2px solid #333; transform:scale(1.15); box-shadow:0 0 6px rgba(0,0,0,0.3); }
 </style>
 </head>
 <body>
