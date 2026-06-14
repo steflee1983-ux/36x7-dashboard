@@ -107,14 +107,6 @@ function goTab(name) {
   document.getElementById('p-' + name).classList.add('active');
   var el = document.querySelector('.tab[onclick*="' + name + '"]');
   if (el) el.classList.add('active');
-  var betArea = document.getElementById('bet-area');
-  if (name === 'trend') {
-    betArea.style.display = 'block';
-    if (!window._bet_init) { renderBetBalls(); window._bet_init = true; }
-    renderBetHistory();
-  } else {
-    betArea.style.display = 'none';
-  }
   if (name === 'freq' && !window._freq_done) { renderFreq(); window._freq_done = true; }
   if (name === 'hc' && !window._hc_done) { renderHC(); window._hc_done = true; }
   if (name === 'miss' && !window._miss_done) { renderMiss(); window._miss_done = true; }
@@ -227,8 +219,27 @@ function renderTrend() {
     }
     h += '</tr>';
   }
+  // 模拟投注分隔行
+  h += '<tr id="bet-row"><td colspan="37" style="padding:0; border:none; height:0;"></td></tr>';
   h += '</tbody></table></div>';
+  // 模拟投注区域
+  h += '<div id="bet-area">';
+  h += '<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:10px;">';
+  h += '<h3 style="margin:0">模拟投注（点击下方号码球选7个）</h3>';
+  h += '<div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:12px;">';
+  h += '<span>已选：<strong id="bet-count" style="color:#e74c3c">0</strong>/7</span>';
+  h += '<button class="btn-green" onclick="randomBet()">机选</button>';
+  h += '<button class="btn-red" onclick="clearBet()">清空</button>';
+  h += '<button class="btn-blue" onclick="doBet()">模拟投注</button>';
+  h += '<span id="bet-msg" style="font-weight:bold"></span>';
+  h += '</div></div>';
+  h += '<div id="bet-balls" style="display:flex; flex-wrap:wrap; gap:3px; margin-bottom:8px;"></div>';
+  h += '<div id="bet-result" style="font-size:12px;"></div>';
+  h += '<div id="bet-history" style="font-size:12px;"></div>';
+  h += '</div>';
   document.getElementById('p-trend').innerHTML = h;
+  renderBetBalls();
+  renderBetHistory();
 }
 
 function renderSum() {
