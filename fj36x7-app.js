@@ -199,7 +199,7 @@ function renderMiss() {
 }
 
 function renderTrend() {
-  var h = '<div style="margin-bottom:10px"><strong>走势图</strong> （每行一期，共' + DATA.length + '期，彩色球表示开出号码）</div>';
+  var h = '<div style="margin-bottom:10px"><strong>走势图</strong> （每行一期，共' + DATA.length + '期；底部"模拟投注"行可点球选号）</div>';
   h += '<div style="overflow-x:auto"><table class="trend-table"><thead><tr><th>期号</th>';
   for (var i = 1; i <= 36; i++) h += '<th>' + pad(i) + '</th>';
   h += '</tr></thead><tbody>';
@@ -219,28 +219,32 @@ function renderTrend() {
     }
     h += '</tr>';
   }
-  // 模拟投注分隔行
-  h += '<tr id="bet-row"><td colspan="37" style="padding:0; border:none; height:0;"></td></tr>';
+  // 模拟投注行（在表格内）
+  h += '<tr style="background:#fffbe6;border-top:3px solid #f39c12;">';
+  h += '<td style="font-weight:bold;color:#e74c3c;white-space:nowrap;">模拟投注</td>';
+  for (var i = 1; i <= 36; i++) {
+    var sel = BET.indexOf(i) >= 0 ? ' selected' : '';
+    h += '<td style="padding:1px 2px;text-align:center;">' +
+      '<span class="nb ' + cls(i) + sel + '" style="cursor:pointer;border:2px solid ' + (sel ? '#333' : 'transparent') + ';" onclick="toggleBet(' + i + ')">' + pad(i) + '</span>' +
+      '</td>';
+  }
+  h += '</tr>';
   h += '</tbody></table></div>';
-  // 模拟投注区域
-  h += '<div id="bet-area">';
-  h += '<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:10px;">';
-  h += '<h3 style="margin:0">模拟投注（点击下方号码球选7个）</h3>';
-  h += '<div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:12px;">';
-  h += '<span>已选：<strong id="bet-count" style="color:#e74c3c">0</strong>/7</span>';
+  // 操作按钮和结果显示（在表格下方）
+  h += '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;">';
+  h += '<span>已选：<strong id="bet-count" style="color:#e74c3c">' + BET.length + '</strong>/7</span>';
   h += '<button class="btn-green" onclick="randomBet()">机选</button>';
   h += '<button class="btn-red" onclick="clearBet()">清空</button>';
   h += '<button class="btn-blue" onclick="doBet()">模拟投注</button>';
   h += '<span id="bet-msg" style="font-weight:bold"></span>';
-  h += '</div></div>';
-  h += '<div id="bet-balls" style="display:flex; flex-wrap:wrap; gap:3px; margin-bottom:8px;"></div>';
-  h += '<div id="bet-result" style="font-size:12px;"></div>';
-  h += '<div id="bet-history" style="font-size:12px;"></div>';
   h += '</div>';
+  h += '<div id="bet-result" style="margin-top:10px;font-size:12px;"></div>';
+  h += '<div id="bet-history" style="margin-top:10px;font-size:12px;"></div>';
   document.getElementById('p-trend').innerHTML = h;
-  renderBetBalls();
   renderBetHistory();
 }
+
+
 
 function renderSum() {
   var sums = [];
@@ -295,17 +299,7 @@ function renderSum() {
 }
 
 // ===== 模拟投注功能 =====
-function renderBetBalls() {
-  var container = document.getElementById('bet-balls');
-  var h = '';
-  for (var i = 1; i <= 36; i++) {
-    var clsName = 'nb ' + cls(i);
-    if (BET.indexOf(i) >= 0) clsName += ' selected';
-    h += '<span class="' + clsName + '" onclick="toggleBet(' + i + ')">' + pad(i) + '</span>';
-  }
-  container.innerHTML = h;
-  document.getElementById('bet-count').textContent = BET.length;
-}
+
 
 function toggleBet(n) {
   var idx = BET.indexOf(n);
@@ -313,13 +307,15 @@ function toggleBet(n) {
     BET.splice(idx, 1);
   } else {
     if (BET.length >= 7) {
-      document.getElementById('bet-msg').innerHTML = '<span style="color:#e74c3c">最多选7个号码</span>';
+      var msg = document.getElementById('bet-msg');
+      if (msg) msg.innerHTML = '<span style="color:#e74c3c">最多选7个号码</span>';
       return;
     }
     BET.push(n);
   }
-  renderBetBalls();
-  document.getElementById('bet-msg').innerHTML = '';
+  renderBetRow();
+  var msg = document.getElementById('bet-msg');
+  if (msg) msg.innerHTML = '';
 }
 
 function randomBet() {
@@ -332,15 +328,32 @@ function randomBet() {
     pool.splice(ri, 1);
   }
   BET.sort(function(a, b) { return a - b; });
-  renderBetBalls();
+  renderBetRow();
   document.getElementById('bet-msg').innerHTML = '';
 }
 
 function clearBet() {
   BET = [];
-  renderBetBalls();
+  renderBetRow();
   document.getElementById('bet-msg').innerHTML = '';
   document.getElementById('bet-result').innerHTML = '';
+}
+
+
+function renderBetRow() {
+  var tbody = document.querySelector('#p-trend tbody');
+  if (!tbody) return;
+  var rows = tbody.rows;
+  var betRow = rows[rows.length - 1]; // last row
+  if (!betRow) return;
+  for (var i = 1; i <= 36; i++) {
+    var cell = betRow.cells[i];
+    if (!cell) continue;
+    var sel = BET.indexOf(i) >= 0;
+    cell.innerHTML = '<span class="nb ' + cls(i) + (sel ? ' selected' : '') + '" style="cursor:pointer;border:2px solid ' + (sel ? '#333' : 'transparent') + ';" onclick="toggleBet(' + i + ')">' + pad(i) + '</span>';
+  }
+  var cnt = document.getElementById('bet-count');
+  if (cnt) cnt.textContent = BET.length;
 }
 
 function doBet() {
