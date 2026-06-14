@@ -223,10 +223,14 @@ function renderTrend() {
   h += '<tr style="background:#fffbe6;border-top:3px solid #f39c12;">';
   h += '<td style="font-weight:bold;color:#e74c3c;white-space:nowrap;">模拟投注</td>';
   for (var i = 1; i <= 36; i++) {
-    var sel = BET.indexOf(i) >= 0 ? ' selected' : '';
-    h += '<td style="padding:1px 2px;text-align:center;">' +
-      '<span class="nb ' + cls(i) + sel + '" style="cursor:pointer;border:2px solid ' + (sel ? '#333' : 'transparent') + ';" onclick="toggleBet(' + i + ')">' + pad(i) + '</span>' +
-      '</td>';
+    var sel = BET.indexOf(i) >= 0;
+    if (sel) {
+      h += '<td style="padding:1px 2px;text-align:center;">' +
+        '<span class="nb ' + cls(i) + ' selected" style="cursor:pointer;border:2px solid #333;transform:scale(1.15);box-shadow:0 0 6px rgba(0,0,0,0.3);" onclick="toggleBet(' + i + ')">' + pad(i) + '</span>' +
+        '</td>';
+    } else {
+      h += '<td style="padding:1px 2px;text-align:center;cursor:pointer;color:#ccc;font-size:16px;" onclick="toggleBet(' + i + ')" id="bet-cell-' + i + '">+</td>';
+    }
   }
   h += '</tr>';
   h += '</tbody></table></div>';
@@ -350,7 +354,11 @@ function renderBetRow() {
     var cell = betRow.cells[i];
     if (!cell) continue;
     var sel = BET.indexOf(i) >= 0;
-    cell.innerHTML = '<span class="nb ' + cls(i) + (sel ? ' selected' : '') + '" style="cursor:pointer;border:2px solid ' + (sel ? '#333' : 'transparent') + ';" onclick="toggleBet(' + i + ')">' + pad(i) + '</span>';
+    if (sel) {
+      cell.innerHTML = '<span class="nb ' + cls(i) + ' selected" style="cursor:pointer;border:2px solid #333;transform:scale(1.15);box-shadow:0 0 6px rgba(0,0,0,0.3);" onclick="toggleBet(' + i + ')">' + pad(i) + '</span>';
+    } else {
+      cell.innerHTML = '<span style="color:#ccc;font-size:16px;cursor:pointer;" onclick="toggleBet(' + i + ')">+</span>';
+    }
   }
   var cnt = document.getElementById('bet-count');
   if (cnt) cnt.textContent = BET.length;
