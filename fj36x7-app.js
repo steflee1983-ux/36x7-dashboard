@@ -550,63 +550,81 @@ function fetchLatestData(callback) {
     status.innerHTML = '正在检查最新开奖数据...';
     status.style.color = '#f39c12';
   }
-  fetch(_UPDATE_URL, { cache: 'no-cache' })
-    .then(function(res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    })
-    .then(function(remoteData) {
-      if (!remoteData || !remoteData.length) throw new Error('empty data');
-      // 合并数据：只添加本地没有的新期号
-      var localPhases = {};
-      for (var i = 0; i < DATA.length; i++) localPhases[DATA[i][0]] = true;
-      var newCount = 0;
-      for (var i = 0; i < remoteData.length; i++) {
-        if (!localPhases[remoteData[i][0]]) {
-          DATA.push(remoteData[i]);
-          newCount++;
-        }
-      }
-      if (newCount > 0) {
-        // 按期中排序
-        DATA.sort(function(a, b) { return a[0].localeCompare(b[0]); });
-        saveData(DATA);
-        updateHeader();
-        renderStats();
-        renderHistory();
-        // 清除 Tab 渲染标记，以便刷新显示
-        window._freq_done = false;
-        window._hc_done = false;
-        window._miss_done = false;
-        window._trend_done = false;
-        window._sum_done = false;
-        var activeTab = document.querySelector('.tab.active');
-        if (activeTab) {
-          var name = activeTab.getAttribute('onclick').match(/'([^']+)'/)[1];
-          goTab(name);
-        }
-        if (status) {
-          status.innerHTML = '成功更新 ' + newCount + ' 期最新数据！';
-          status.style.color = '#27ae60';
-        }
-      } else {
-        if (status) {
-          status.innerHTML = '已是最新数据';
-          status.style.color = '#27ae60';
-        }
-      }
-      _UPDATE_BUSY = false;
-      if (callback) callback(true, newCount);
-    })
-    .catch(function(err) {
+  
+  // 尝试多个数据源
+  var sources = [
+    'https://cdn.jsdelivr.net/gh/steflee1983-ux/36x7-dashboard@main/data.json',
+    'https://raw.githubusercontent.com/steflee1983-ux/36x7-dashboard/main/data.json'
+  ];
+  
+  var trySource = function(index) {
+    if (index >= sources.length) {
+      // 所有数据源都失败
       if (status) {
-        status.innerHTML = '在线更新失败，请手动输入';
+        status.innerHTML = '在线更新失败，请手动输入或使用抓取脚本';
         status.style.color = '#e74c3c';
       }
       _UPDATE_BUSY = false;
       if (callback) callback(false, 0);
-    });
+      return;
+    }
+    
+    fetch(sources[index], { cache: 'no-cache' })
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(remoteData) {
+        if (!remoteData || !remoteData.length) throw new Error('empty data');
+        // 合并数据
+        var localPhases = {};
+        for (var i = 0; i < DATA.length; i++) localPhases[DATA[i][0]] = true;
+        var newCount = 0;
+        for (var i = 0; i < remoteData.length; i++) {
+          if (!localPhases[remoteData[i][0]]) {
+            DATA.push(remoteData[i]);
+            newCount++;
+          }
+        }
+        if (newCount > 0) {
+          DATA.sort(function(a, b) { return a[0].localeCompare(b[0]); });
+          saveData(DATA);
+          updateHeader();
+          renderStats();
+          renderHistory();
+          window._freq_done = false;
+          window._hc_done = false;
+          window._miss_done = false;
+          window._trend_done = false;
+          window._sum_done = false;
+          var activeTab = document.querySelector('.tab.active');
+          if (activeTab) {
+            var name = activeTab.getAttribute('onclick').match(/'([^']+)'/)[1];
+            goTab(name);
+          }
+          if (status) {
+            status.innerHTML = '成功更新 ' + newCount + ' 期最新数据！';
+            status.style.color = '#27ae60';
+          }
+        } else {
+          if (status) {
+            status.innerHTML = '已是最新数据';
+            status.style.color = '#27ae60';
+          }
+        }
+        _UPDATE_BUSY = false;
+        if (callback) callback(true, newCount);
+      })
+      .catch(function(err) {
+        // 尝试下一个数据源
+        trySource(index + 1);
+      });
+  };
+  
+  trySource(0);
 }
+
+
 
 // 页面加载时自动更新
 fetchLatestData();
